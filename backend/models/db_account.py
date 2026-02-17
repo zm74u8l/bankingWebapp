@@ -7,3 +7,5 @@ class DBAccount(Base):
     id = Column(String, primary_key=True, index=True)
     name = Column(String)
     type = Column(String)
+    amount = Column(String)
+    currency = Column(Float)

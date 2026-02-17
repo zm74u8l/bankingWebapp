@@ -7,32 +7,61 @@ from backend.database import get_db
 from backend.models.db_transaction import DBTransaction
 from backend.models.transaction import Transaction
 from datetime import date
+import re
 
 router = APIRouter()
 
+
 @router.get("/transactions")
 def get_transactions(db: Session = Depends(get_db)):
-    transactions = db.query(DBTransaction).all()
+    transactions = db.query(DBTransaction).order_by(DBTransaction.date.desc()).all()
+
     return transactions
+
 
 @router.post("/transactions/upload-csv")
 def upload_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = file.file.read().decode("utf-8")
     csv_read = csv.DictReader(io.StringIO(content))
-
+    errors= []
     inserted_transactions = 0
-    for row in csv_read:
-        transaction = DBTransaction(
-            id=str(uuid.uuid4()),
-            account_id=row["account_id"],
-            description=row["description"],
-            amount=float(row["amount"]),
-            currency=row["currency"],
-            date=date.fromisoformat(row["date"]),
-            category=row["category"]
-        )
-        db.add(transaction)
-        inserted_transactions += 1
+
+    for i, row in enumerate(csv_read, start=1):
+
+        try:
+            if re.search(r"(transaction|txn)\s*id,",csv_read.fieldnames, re.IGNORECASE):
+                check_transaction_id = row.get(re.search(r"(transaction|txn)\s*id,",csv_read.fieldnames, re.IGNORECASE).group())
+            else:
+                raise ValueError("transaction_id is required")
+            check_amount = row.get("amount")
+            if not check_amount:
+                raise ValueError("amount is required")
+            check_currency = row["currency"]
+            if not check_currency :
+                raise ValueError("currency is required")
+            check_date = date.fromisoformat(row["date"])
+            if not check_date:
+                raise ValueError("date is required")
+
+            transaction = DBTransaction(
+                id=str(uuid.uuid4()),
+                account_id=row["account_id"],
+                description=row["description"],
+                amount=float(row["amount"].strip()),
+                currency=row["currency"],
+                date=date.fromisoformat(row["date"]),
+                category=row["category"]
+            )
+            db.add(transaction)
+            inserted_transactions += 1
+
+        except Exception as e:
+            errors.append({
+                "skipped row": i,
+                "error": str(e)})
+            continue
+    
+    print(errors)
 
     db.commit()
     return {"message": f"{inserted_transactions} transactions inserted successfully."}

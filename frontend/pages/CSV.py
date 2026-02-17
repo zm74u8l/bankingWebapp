@@ -20,3 +20,5 @@ if uploaded_csv is not None:
         st.success({"message": response.json()["message"]})
         st.switch_page("app.py")
 
+    if response.status_code != 200:
+        st.error("Failed to upload CSV file.")

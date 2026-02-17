@@ -1,0 +1,13 @@
+account_id,description,amount,currency,date,category
+12345,Uber,-4.50,GBP,2025-01-22,Food
+12345,Uber,-4.50,GBP,2025-01-15,Food
+12345,Uber,-4.50,GBP,2025-01-29,Food
+12345,Uber,-4.50,GBP,2025-02-5,Food
+12345,Netflix,-10.50,GBP,2025-01-15,Food
+12345,Netflix,-10.50,GBP,2025-02-15,Food
+12345,Netflix,-10.50,GBP,2025-03-15,Food
+12345,Netflix,-10.50,GBP,2025-04-15,Food
+12345,Argos,-12.50,GBP,2025-01-15,Food
+12345,Argos,-12.50,GBP,2024-01-15,Food
+12345,Argos,-12.50,GBP,2023-01-15,Food
+12345,Argos,-12.50,GBP,2022-01-15,Food
